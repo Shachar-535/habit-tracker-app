@@ -2,723 +2,910 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>שעון הישגים אישי</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#09090b">
+    <title>שעון הישגים פרימיום</title>
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
                         sans: ['Heebo', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
                     },
                     colors: {
-                        primary: 'var(--primary)',
-                        secondary: 'var(--secondary)',
-                        background: 'var(--bg)',
-                        surface: 'var(--surface)',
-                        textMain: 'var(--text-main)',
-                        textMuted: 'var(--text-muted)',
-                        ringTrack: 'var(--ring-track)'
+                        glass: {
+                            100: 'rgba(255, 255, 255, 0.1)',
+                            200: 'rgba(255, 255, 255, 0.05)',
+                            border: 'rgba(255, 255, 255, 0.15)'
+                        },
+                        brand: {
+                            500: '#8b5cf6', // Purple
+                            400: '#a78bfa',
+                            glow: 'rgba(139, 92, 246, 0.5)'
+                        }
+                    },
+                    boxShadow: {
+                        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+                        'neon': '0 0 15px rgba(139, 92, 246, 0.6), 0 0 30px rgba(139, 92, 246, 0.4)'
                     }
                 }
             }
         }
     </script>
-    <!-- Google Fonts: Heebo for Hebrew -->
-    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <!-- Confetti Library -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <!-- Font Awesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
-        /* Theme Definitions */
-        :root {
-            /* Theme 1: Modern Classic (Default) */
-            --primary: #2563eb; /* blue-600 */
-            --secondary: #d97706; /* amber-600 */
-            --bg: #f3f4f6; /* gray-100 */
-            --surface: rgba(255, 255, 255, 0.8);
-            --text-main: #1f2937; /* gray-800 */
-            --text-muted: #6b7280; /* gray-500 */
-            --ring-track: #e5e7eb;
-        }
-
-        .theme-cyberpunk {
-            /* Theme 2: Neon Cyberpunk */
-            --primary: #a855f7; /* purple-500 */
-            --secondary: #06b6d4; /* cyan-500 */
-            --bg: #0f172a; /* slate-900 */
-            --surface: rgba(30, 41, 59, 0.7);
-            --text-main: #f8fafc; /* slate-50 */
-            --text-muted: #94a3b8; /* slate-400 */
-            --ring-track: #334155;
-        }
-
-        .theme-zen {
-            /* Theme 3: Zen & Nature */
-            --primary: #4d7c0f; /* lime-700 */
-            --secondary: #15803d; /* green-700 */
-            --bg: #ecfccb; /* lime-50 */
-            --surface: rgba(255, 255, 255, 0.65);
-            --text-main: #3f6212; /* lime-800 */
-            --text-muted: #65a30d; /* lime-600 */
-            --ring-track: #d9f99d;
-        }
-
         body {
-            font-family: 'Heebo', sans-serif;
+            background-color: #09090b;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,0.2) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,0.2) 0, transparent 50%);
+            background-attachment: fixed;
+            color: #f8fafc;
             -webkit-tap-highlight-color: transparent;
-            background-color: var(--bg);
-            color: var(--text-main);
-            transition: background-color 0.5s ease, color 0.5s ease;
+            overscroll-behavior-y: none;
+        }
+
+        /* Glassmorphism Panel */
+        .glass-panel {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Animations */
+        .screen-transition {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
-        .glass-panel {
-            background: var(--surface);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(128, 128, 128, 0.1);
-            transition: background-color 0.5s ease;
-        }
+        .slide-out-left { transform: translateX(100%); opacity: 0; pointer-events: none; position: absolute; inset: 0; }
+        .slide-in-right { transform: translateX(0); opacity: 1; position: absolute; inset: 0; z-index: 10; }
+        .slide-out-right { transform: translateX(-100%); opacity: 0; pointer-events: none; position: absolute; inset: 0; }
+        
+        .fade-hidden { opacity: 0; pointer-events: none; position: absolute; inset: 0; z-index: -1; }
+        .fade-visible { opacity: 1; pointer-events: auto; position: absolute; inset: 0; z-index: 10; }
 
-        /* Custom Scrollbar for history */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: var(--primary);
-            border-radius: 20px;
-            opacity: 0.5;
-        }
-
-        .badge-locked {
-            filter: grayscale(100%);
-            opacity: 0.3;
-        }
-
-        /* Circular Progress Rings */
+        /* SVG Timer Ring */
         .progress-ring__circle {
-            transition: stroke-dashoffset 0.5s linear, stroke 0.5s ease;
+            transition: stroke-dashoffset 1s linear;
             transform: rotate(-90deg);
             transform-origin: 50% 50%;
+            filter: drop-shadow(0 0 8px var(--tw-shadow-color));
         }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+
+        .btn-press:active { transform: scale(0.95); }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="h-[100dvh] w-full flex justify-center overflow-hidden antialiased selection:bg-brand-500 selection:text-white relative text-gray-100">
 
-    <!-- Screen 1: Set Password (First Load) -->
-    <div id="screen-set-password" class="hidden flex-1 flex items-center justify-center p-4">
-        <div class="glass-panel p-8 rounded-3xl shadow-2xl max-w-md w-full text-center">
-            <div class="text-5xl text-primary mb-4"><i class="fas fa-lock"></i></div>
-            <h1 class="text-2xl font-bold mb-2">ברוך הבא!</h1>
-            <p class="text-textMuted mb-6 text-sm">נראה שזו הפעם הראשונה שלך כאן. הגדר סיסמה כדי לשמור על הנתונים שלך פרטיים.</p>
-            
-            <input type="password" id="input-new-password" placeholder="הכנס סיסמה חדשה" 
-                class="w-full px-4 py-3 rounded-xl border border-gray-300/50 bg-white/50 focus:ring-2 focus:ring-primary outline-none mb-4 text-center text-gray-800">
-            
-            <input type="password" id="input-confirm-password" placeholder="אמת סיסמה" 
-                class="w-full px-4 py-3 rounded-xl border border-gray-300/50 bg-white/50 focus:ring-2 focus:ring-primary outline-none mb-6 text-center text-gray-800">
-            
-            <button onclick="setPassword()" class="w-full bg-primary hover:opacity-90 text-white font-bold py-3 rounded-xl transition-all shadow-lg">
-                הגדר והתחל
-            </button>
-            <p id="set-password-error" class="text-red-500 text-sm mt-3 hidden"></p>
-        </div>
-    </div>
+    <!-- Mobile Container Constraint -->
+    <div id="app-container" class="w-full max-w-md h-full relative overflow-hidden flex flex-col bg-black/20">
 
-    <!-- Screen 2: Login -->
-    <div id="screen-login" class="hidden flex-1 flex items-center justify-center p-4">
-        <div class="glass-panel p-8 rounded-3xl shadow-2xl max-w-md w-full text-center">
-            <div class="text-5xl text-primary mb-4"><i class="fas fa-shield-alt"></i></div>
-            <h1 class="text-2xl font-bold mb-6">הזן סיסמה</h1>
-            
-            <input type="password" id="input-login-password" placeholder="סיסמה" 
-                class="w-full px-4 py-3 rounded-xl border border-gray-300/50 bg-white/50 focus:ring-2 focus:ring-primary outline-none mb-6 text-center text-gray-800">
-            
-            <button onclick="login()" class="w-full bg-primary hover:opacity-90 text-white font-bold py-3 rounded-xl transition-all shadow-lg">
-                היכנס
-            </button>
-            <p id="login-error" class="text-red-500 text-sm mt-3 hidden">סיסמה שגויה, נסה שוב.</p>
-        </div>
-    </div>
-
-    <!-- Screen 3: Main App -->
-    <div id="screen-main" class="hidden flex-1 flex flex-col">
-        <!-- Header -->
-        <header class="p-4 flex justify-between items-center glass-panel sticky top-0 z-10 shadow-sm">
-            <button onclick="cycleTheme()" class="w-10 h-10 rounded-full bg-surface border border-gray-400/20 flex items-center justify-center transition-colors shadow-sm text-primary">
-                <i id="theme-icon" class="fas fa-palette"></i>
-            </button>
-            
-            <div class="flex-1 text-center px-4 flex justify-center items-center gap-2 cursor-pointer group" onclick="openTitleModal()">
-                <h1 id="app-title" class="text-xl md:text-2xl font-bold truncate">זמן ללא...</h1>
-                <i class="fas fa-pen text-sm text-textMuted group-hover:text-primary transition-colors"></i>
-            </div>
-            
-            <!-- Hidden button to balance flex -->
-            <div class="w-10"></div>
-        </header>
-
-        <main class="flex-1 p-4 flex flex-col gap-6 max-w-2xl w-full mx-auto">
-            
-            <!-- Circular Live Timer Section -->
-            <div class="glass-panel rounded-3xl p-6 shadow-xl flex flex-col items-center">
-                <p class="text-sm text-textMuted mb-6 font-semibold">זמן שעבר מאז האיפוס האחרון:</p>
+        <!-- ==================== SCREEN 1: AUTHENTICATION ==================== -->
+        <div id="screen-auth" class="screen-transition fade-visible flex flex-col items-center justify-center p-6 text-center z-50 bg-[#09090b]">
+            <div class="glass-panel p-8 rounded-3xl w-full max-w-sm flex flex-col items-center">
+                <div class="w-20 h-20 rounded-full bg-brand-500/20 border border-brand-500/50 flex items-center justify-center mb-6 shadow-neon shadow-brand-500">
+                    <i class="fas fa-fingerprint text-4xl text-brand-400"></i>
+                </div>
                 
-                <!-- Rings Grid: 2x2 on Mobile, 4x1 on Desktop -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-4 w-full place-items-center" dir="ltr">
+                <h1 id="auth-title" class="text-2xl font-bold mb-2">ברוך הבא</h1>
+                <p id="auth-subtitle" class="text-sm text-gray-400 mb-8">הגדר קוד גישה חדש (4 ספרות ומעלה)</p>
+                
+                <form id="auth-form" class="w-full relative" onsubmit="handleAuth(event)">
+                    <input type="password" id="auth-pin" inputmode="numeric" placeholder="••••" autocomplete="off"
+                        class="w-full bg-black/40 border border-glass-border rounded-2xl px-4 py-4 text-center text-3xl tracking-[1em] text-white focus:outline-none focus:border-brand-500 transition-colors mb-4 placeholder:text-gray-600 placeholder:tracking-normal">
                     
-                    <!-- Days Ring -->
-                    <div class="relative flex justify-center items-center w-32 h-32 md:w-28 md:h-28">
-                        <svg class="w-full h-full" viewBox="0 0 100 100">
-                            <circle cx="50" cy="50" r="45" fill="none" stroke="var(--ring-track)" stroke-width="6"></circle>
-                            <circle id="ring-days" class="progress-ring__circle" cx="50" cy="50" r="45" fill="none" stroke="var(--primary)" stroke-width="6" stroke-dasharray="283" stroke-dashoffset="283"></circle>
-                        </svg>
-                        <div class="absolute flex flex-col items-center justify-center">
-                            <span id="timer-days" class="text-3xl font-bold text-textMain tabular-nums">00</span>
-                            <span class="text-xs text-textMuted font-bold">ימים</span>
-                        </div>
-                    </div>
-
-                    <!-- Hours Ring -->
-                    <div class="relative flex justify-center items-center w-32 h-32 md:w-28 md:h-28">
-                        <svg class="w-full h-full" viewBox="0 0 100 100">
-                            <circle cx="50" cy="50" r="45" fill="none" stroke="var(--ring-track)" stroke-width="6"></circle>
-                            <circle id="ring-hours" class="progress-ring__circle" cx="50" cy="50" r="45" fill="none" stroke="var(--primary)" stroke-width="6" stroke-dasharray="283" stroke-dashoffset="283"></circle>
-                        </svg>
-                        <div class="absolute flex flex-col items-center justify-center">
-                            <span id="timer-hours" class="text-3xl font-bold text-textMain tabular-nums">00</span>
-                            <span class="text-xs text-textMuted font-bold">שעות</span>
-                        </div>
-                    </div>
-
-                    <!-- Minutes Ring -->
-                    <div class="relative flex justify-center items-center w-32 h-32 md:w-28 md:h-28">
-                        <svg class="w-full h-full" viewBox="0 0 100 100">
-                            <circle cx="50" cy="50" r="45" fill="none" stroke="var(--ring-track)" stroke-width="6"></circle>
-                            <circle id="ring-minutes" class="progress-ring__circle" cx="50" cy="50" r="45" fill="none" stroke="var(--primary)" stroke-width="6" stroke-dasharray="283" stroke-dashoffset="283"></circle>
-                        </svg>
-                        <div class="absolute flex flex-col items-center justify-center">
-                            <span id="timer-minutes" class="text-3xl font-bold text-textMain tabular-nums">00</span>
-                            <span class="text-xs text-textMuted font-bold">דקות</span>
-                        </div>
-                    </div>
-
-                    <!-- Seconds Ring -->
-                    <div class="relative flex justify-center items-center w-32 h-32 md:w-28 md:h-28">
-                        <svg class="w-full h-full" viewBox="0 0 100 100">
-                            <circle cx="50" cy="50" r="45" fill="none" stroke="var(--ring-track)" stroke-width="6"></circle>
-                            <circle id="ring-seconds" class="progress-ring__circle" cx="50" cy="50" r="45" fill="none" stroke="var(--secondary)" stroke-width="6" stroke-dasharray="283" stroke-dashoffset="283"></circle>
-                        </svg>
-                        <div class="absolute flex flex-col items-center justify-center">
-                            <span id="timer-seconds" class="text-3xl font-bold text-textMain tabular-nums">00</span>
-                            <span class="text-xs text-textMuted font-bold">שניות</span>
-                        </div>
-                    </div>
-
-                </div>
+                    <button type="submit" class="w-full bg-brand-500 hover:bg-brand-400 text-white font-bold py-4 rounded-2xl btn-press shadow-neon shadow-brand-500 transition-all">
+                        <span id="auth-btn-text">כניסה למערכת</span> <i class="fas fa-arrow-left ml-2"></i>
+                    </button>
+                </form>
+                <p id="auth-error" class="text-red-400 text-sm mt-4 opacity-0 transition-opacity">קוד שגוי, נסה שוב.</p>
             </div>
+        </div>
 
-            <!-- Gamification / Badges Section -->
-            <div class="glass-panel rounded-3xl p-5 shadow-lg">
-                <h2 class="text-lg font-bold mb-4 text-center">הישגים בדרך</h2>
-                <div class="grid grid-cols-4 gap-2 text-center">
-                    <!-- 24 Hours -->
-                    <div id="badge-24h" class="badge-locked flex flex-col items-center transition-all duration-500">
-                        <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xl mb-1 shadow-sm">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                        <span class="text-xs font-semibold">24 שעות</span>
-                    </div>
-                    <!-- 3 Days -->
-                    <div id="badge-3d" class="badge-locked flex flex-col items-center transition-all duration-500">
-                        <div class="w-12 h-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xl mb-1 shadow-sm">
-                            <i class="fas fa-leaf"></i>
-                        </div>
-                        <span class="text-xs font-semibold">3 ימים</span>
-                    </div>
-                    <!-- 1 Week -->
-                    <div id="badge-1w" class="badge-locked flex flex-col items-center transition-all duration-500">
-                        <div class="w-12 h-12 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xl mb-1 shadow-sm">
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <span class="text-xs font-semibold">שבוע</span>
-                    </div>
-                    <!-- 1 Month -->
-                    <div id="badge-1m" class="badge-locked flex flex-col items-center transition-all duration-500">
-                        <div class="w-12 h-12 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center text-xl mb-1 shadow-sm">
-                            <i class="fas fa-crown"></i>
-                        </div>
-                        <span class="text-xs font-semibold">חודש!</span>
-                    </div>
+        <!-- ==================== SCREEN 2: DASHBOARD ==================== -->
+        <div id="screen-dashboard" class="screen-transition fade-hidden flex flex-col h-full">
+            <!-- Header -->
+            <header class="pt-12 pb-4 px-6 flex justify-between items-center glass-panel rounded-b-3xl z-20">
+                <div>
+                    <h1 class="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-l from-white to-gray-400">ההישגים שלי</h1>
+                    <p id="dashboard-date" class="text-xs text-gray-400 font-mono mt-1"></p>
                 </div>
-            </div>
+                <button onclick="openSettingsModal()" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center btn-press">
+                    <i class="fas fa-cog text-gray-300"></i>
+                </button>
+            </header>
 
-            <!-- Reset Button -->
-            <button onclick="openResetModal()" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-red-500/30 transition-transform active:scale-95 flex justify-center items-center gap-3 text-lg border-none">
-                <i class="fas fa-redo-alt"></i>
-                איפוס שעון (נפלתי)
+            <!-- Habits List -->
+            <main class="flex-1 overflow-y-auto p-4 pb-24 z-10 space-y-4" id="habits-list">
+                <!-- Populated by JS -->
+            </main>
+
+            <!-- FAB Add Button -->
+            <button onclick="openAddModal()" class="absolute bottom-8 left-6 w-14 h-14 bg-brand-500 rounded-full flex items-center justify-center shadow-neon shadow-brand-500 text-xl btn-press z-30">
+                <i class="fas fa-plus"></i>
             </button>
+        </div>
 
-            <!-- Weekly Review Section -->
-            <div class="glass-panel rounded-3xl p-5 shadow-lg flex-col overflow-hidden">
-                <h2 class="text-lg font-bold mb-3 flex items-center gap-2">
-                    <i class="fas fa-calendar-week text-primary"></i> 
-                    סקירה שבועית (הכי טוב ב-7 ימים האחרונים)
-                </h2>
-                <div class="text-center p-4 bg-background/50 rounded-2xl border border-gray-400/20">
-                    <div id="weekly-best-day" class="text-2xl font-bold text-primary mb-2">-</div>
-                    <div id="weekly-best-duration" class="inline-block bg-secondary text-white px-4 py-1.5 rounded-full text-sm font-semibold shadow-md">
-                        -
+        <!-- ==================== SCREEN 3: HABIT DETAIL ==================== -->
+        <div id="screen-detail" class="screen-transition slide-out-left flex flex-col h-full bg-[#09090b]/95 backdrop-blur-xl">
+            <!-- Detail Header -->
+            <header class="pt-12 pb-4 px-4 flex items-center justify-between z-20 w-full">
+                <button onclick="closeDetail()" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center btn-press">
+                    <i class="fas fa-chevron-right text-gray-300"></i>
+                </button>
+                <h2 id="detail-title" class="text-xl font-bold flex-1 truncate text-center px-2">--</h2>
+                <div class="flex gap-2">
+                    <button id="btn-toggle-design" onclick="cycleDesign()" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center btn-press text-brand-400">
+                        <i class="fas fa-palette"></i>
+                    </button>
+                    <button id="btn-toggle-fav" onclick="toggleFavorite()" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center btn-press text-gray-400">
+                        <i class="fas fa-star"></i>
+                    </button>
+                    <button onclick="deleteCurrentHabit()" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center btn-press text-red-400">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto px-4 pb-8 flex flex-col items-center">
+                <!-- Circular Timer -->
+                <div id="detail-ring-container" class="relative w-72 h-72 my-6 flex items-center justify-center">
+                    <!-- SVG injected here by renderDetail -->
+                    <div id="detail-text-overlay" class="absolute inset-0 flex items-center justify-center text-center flex-col z-10 w-full px-4 pointer-events-none">
+                        <span id="detail-days" class="text-sm font-semibold text-brand-400 uppercase tracking-widest mb-1">0 ימים</span>
+                        <span id="detail-time" class="text-4xl font-mono font-bold tracking-tight text-white mb-2" dir="ltr">00:00:00</span>
+                        <div class="glass-panel px-3 py-1 rounded-full flex items-center gap-2 mt-1">
+                            <i class="fas fa-flag-checkered text-[10px] text-gray-400"></i>
+                            <span id="detail-milestone-text" class="text-[11px] text-gray-300">יעד הבא: --</span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- History Table -->
-            <div class="glass-panel rounded-3xl p-5 shadow-lg flex-1 flex flex-col overflow-hidden mb-4">
-                <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
-                    <i class="fas fa-history text-primary"></i> 
-                    היסטוריית שיאים
-                </h2>
+                <!-- Reset Button -->
+                <button onclick="openResetModal()" class="w-full max-w-[200px] bg-white/5 border border-red-500/30 text-red-400 py-3 rounded-2xl font-bold mb-8 btn-press flex items-center justify-center gap-2">
+                    <i class="fas fa-undo"></i> איפוס רצף
+                </button>
+
+                <!-- Milestones Section -->
+                <div class="w-full max-w-sm glass-panel rounded-3xl p-5 flex flex-col mb-4">
+                    <div class="flex items-center gap-2 mb-4 text-gray-300">
+                        <i class="fas fa-medal text-brand-400"></i>
+                        <h3 class="font-bold text-sm">אבני דרך שהושגו</h3>
+                    </div>
+                    <div id="detail-milestones" class="flex flex-wrap justify-center gap-3">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- History Section -->
+                <div class="w-full max-w-sm glass-panel rounded-3xl p-5 flex flex-col">
+                    <div class="flex items-center gap-2 mb-4 text-gray-300">
+                        <i class="fas fa-history text-brand-400"></i>
+                        <h3 class="font-bold text-sm">היסטוריית רצפים</h3>
+                    </div>
+                    <div id="detail-history" class="space-y-3 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- ==================== MODALS ==================== -->
+        
+        <!-- Add Habit Modal -->
+        <div id="modal-add" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+            <div class="glass-panel w-full max-w-xs rounded-3xl p-6 transform transition-all scale-95 opacity-0" id="modal-add-content">
+                <h3 class="text-xl font-bold mb-4">הישג חדש</h3>
+                <input type="text" id="input-habit-title" placeholder="לדוגמה: ללא עישון, אימון כושר..." 
+                    class="w-full bg-black/40 border border-glass-border rounded-xl px-4 py-3 text-white focus:border-brand-500 outline-none mb-6">
+                <div class="flex gap-3">
+                    <button onclick="closeModals()" class="flex-1 py-3 rounded-xl bg-white/10 text-white font-medium btn-press">ביטול</button>
+                    <button onclick="saveNewHabit()" class="flex-1 py-3 rounded-xl bg-brand-500 text-white font-bold btn-press shadow-neon shadow-brand-500">התחל</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reset Confirm Modal -->
+        <div id="modal-reset" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+            <div class="glass-panel w-full max-w-xs rounded-3xl p-6 text-center transform transition-all scale-95 opacity-0 border-red-500/30" id="modal-reset-content">
+                <div class="w-16 h-16 rounded-full bg-red-500/20 text-red-500 mx-auto flex items-center justify-center text-2xl mb-4 border border-red-500/30">
+                    <i class="fas fa-heart-crack"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">נשברת?</h3>
+                <p class="text-sm text-gray-400 mb-6">הרצף הנוכחי יישמר בהיסטוריה, והספירה תתחיל מחדש מ-0.</p>
+                <div class="flex gap-3">
+                    <button onclick="closeModals()" class="flex-1 py-3 rounded-xl bg-white/10 text-white font-medium btn-press">ביטול</button>
+                    <button onclick="confirmReset()" class="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold btn-press">אפס שעון</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings / Backup Modal -->
+        <div id="modal-settings" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+            <div class="glass-panel w-full max-w-xs rounded-3xl p-6 transform transition-all scale-95 opacity-0" id="modal-settings-content">
+                <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fas fa-cog text-brand-400"></i> הגדרות וגיבוי</h3>
                 
-                <div class="overflow-y-auto custom-scrollbar flex-1 pr-1" style="max-height: 250px;">
-                    <div id="history-container" class="flex flex-col gap-3 pb-2">
-                        <!-- History Items go here -->
-                    </div>
+                <div class="space-y-3 mb-6">
+                    <button onclick="exportData()" class="w-full glass-panel py-3 rounded-xl flex items-center justify-between px-4 btn-press text-sm">
+                        <span>גיבוי נתונים למכשיר</span>
+                        <i class="fas fa-download text-brand-400"></i>
+                    </button>
+                    <label class="w-full glass-panel py-3 rounded-xl flex items-center justify-between px-4 btn-press text-sm cursor-pointer border border-brand-500/30">
+                        <span>שחזור נתונים מקובץ</span>
+                        <i class="fas fa-upload text-brand-400"></i>
+                        <input type="file" id="import-file" class="hidden" accept=".json" onchange="importData(event)">
+                    </label>
+                    <button onclick="logout()" class="w-full glass-panel py-3 rounded-xl flex items-center justify-between px-4 btn-press text-sm border-red-500/30 text-red-400 mt-4">
+                        <span>נעילת מערכת</span>
+                        <i class="fas fa-lock"></i>
+                    </button>
                 </div>
-            </div>
-            
-        </main>
-    </div>
 
-    <!-- MODALS -->
-
-    <!-- Edit Title Modal -->
-    <div id="modal-title" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-surface rounded-3xl p-6 w-full max-w-sm shadow-2xl transform scale-95 transition-transform duration-300 border border-gray-400/20" id="modal-title-content">
-            <h3 class="text-xl font-bold mb-4">ערוך כותרת</h3>
-            <input type="text" id="input-app-title" class="w-full px-4 py-3 rounded-xl border border-gray-400/30 bg-background focus:ring-2 focus:ring-primary outline-none mb-6 text-textMain" placeholder="למשל: ימים ללא עישון">
-            <div class="flex gap-3">
-                <button onclick="closeTitleModal()" class="flex-1 py-3 rounded-xl font-semibold bg-gray-400/20 text-textMain">ביטול</button>
-                <button onclick="saveTitle()" class="flex-1 py-3 rounded-xl font-semibold bg-primary text-white shadow-lg shadow-indigo-500/30">שמור</button>
+                <button onclick="closeModals()" class="w-full py-3 rounded-xl bg-white/10 text-white font-medium btn-press">סגור</button>
             </div>
         </div>
+
     </div>
 
-    <!-- Confirm Reset Modal -->
-    <div id="modal-reset" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-surface rounded-3xl p-6 w-full max-w-sm shadow-2xl transform scale-95 transition-transform duration-300 border border-gray-400/20" id="modal-reset-content">
-            <div class="w-16 h-16 rounded-full bg-red-100 text-red-500 flex items-center justify-center text-3xl mx-auto mb-4 shadow-sm">
-                <i class="fas fa-exclamation-triangle"></i>
-            </div>
-            <h3 class="text-xl font-bold mb-2 text-center">האם אתה בטוח?</h3>
-            <p class="text-textMuted text-center mb-6 text-sm">
-                איפוס השעון יתחיל את הספירה מחדש. הזמן הנוכחי יישמר בהיסטוריה שלך.
-            </p>
-            <div class="flex gap-3">
-                <button onclick="closeResetModal()" class="flex-1 py-3 rounded-xl font-semibold bg-gray-400/20 text-textMain transition-colors">לא, התחרטתי</button>
-                <button onclick="confirmReset()" class="flex-1 py-3 rounded-xl font-semibold bg-red-500 hover:bg-red-600 text-white shadow-lg transition-colors border-none">כן, אפס שעון</button>
-            </div>
-        </div>
-    </div>
-
+    <!-- Scripts -->
     <script>
-        // --- State Management ---
-        const LS_PREFIX = 'habit_tracker_pro_';
+        // --- CONSTANTS & STATE ---
+        const STORAGE_KEY = 'premium_habit_tracker_data_v2';
         
-        // Themes Array
-        const themes = ['theme-classic', 'theme-cyberpunk', 'theme-zen'];
+        // Clock SVG Designs
+        const DESIGNS = [
+            { id: 'neon', color: '#8b5cf6', track: 'rgba(255,255,255,0.05)', width: 8, trackDash: 'none', shadow: '0 0 10px rgba(139,92,246,0.8)' },
+            { id: 'dashed', color: '#a78bfa', track: 'rgba(255,255,255,0.15)', width: 6, trackDash: '4 8', shadow: 'none' },
+            { id: 'minimal', color: '#ffffff', track: 'rgba(255,255,255,0.1)', width: 2, trackDash: 'none', shadow: 'none' },
+            { id: 'modern', color: '#0ea5e9', track: 'rgba(14,165,233,0.2)', width: 14, trackDash: 'none', shadow: 'none' }
+        ];
         
-        let appState = {
-            password: '',
-            startTime: null,
-            history: [],
-            title: 'זמן ללא...',
-            themeIndex: 0
+        // New Dynamic Milestones Array
+        const MILESTONES = [
+            { label: '1 שעה', ms: 3600000, icon: 'fa-hourglass-half' },
+            { label: '12 שעות', ms: 43200000, icon: 'fa-clock' },
+            { label: 'יום 1', ms: 86400000, icon: 'fa-sun' },
+            { label: 'יומיים', ms: 172800000, icon: 'fa-calendar-day' },
+            { label: '1 שבוע', ms: 604800000, icon: 'fa-calendar-week' },
+            { label: 'שבועיים', ms: 1209600000, icon: 'fa-calendar-alt' },
+            { label: '1 חודש', ms: 2592000000, icon: 'fa-moon' }, // ~30 days
+            { label: '3 חודשים', ms: 7776000000, icon: 'fa-leaf' }, // ~90 days
+            { label: 'חצי שנה', ms: 15552000000, icon: 'fa-tree' }, // ~180 days
+            { label: '1 שנה', ms: 31536000000, icon: 'fa-crown' }, // 365 days
+            { label: 'נצח', ms: Infinity, icon: 'fa-infinity' }
+        ];
+        
+        let appData = {
+            pinHash: null,
+            favoriteId: null,
+            habits: []
         };
+        
+        let currentHabitId = null;
         let timerInterval = null;
 
-        // Circumference for SVG circles (r=45 -> 2 * PI * 45 = ~283)
-        const CIRCUMFERENCE = 283;
+        // --- CRYPTO (SHA-256) ---
+        async function hashPIN(pin) {
+            const msgBuffer = new TextEncoder().encode(pin);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
 
-        // --- Initialization ---
-        window.onload = function() {
-            loadState();
-            applyTheme();
+        // --- INITIALIZATION ---
+        async function init() {
+            document.getElementById('dashboard-date').textContent = new Date().toLocaleDateString('he-IL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             
-            if (!appState.password) {
-                showScreen('screen-set-password');
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                try {
+                    appData = { ...appData, ...JSON.parse(stored) };
+                    // Set default designs for old habits
+                    appData.habits.forEach(h => { if (!h.design) h.design = 'neon'; });
+                } catch(e) { console.error("Corrupted save file."); }
+            }
+
+            if (!appData.pinHash) {
+                // Setup mode
+                document.getElementById('auth-title').textContent = 'ברוך הבא';
+                document.getElementById('auth-subtitle').textContent = 'הגדר קוד גישה חדש (4 ספרות ומעלה)';
+                document.getElementById('auth-btn-text').textContent = 'הגדר קוד וסיים';
+            } else if (sessionStorage.getItem('auth_session') === 'true') {
+                // Session active - auto login
+                transitionToDashboard();
             } else {
-                showScreen('screen-login');
-            }
-        };
-
-        function loadState() {
-            try {
-                const savedState = localStorage.getItem(LS_PREFIX + 'data');
-                if (savedState) {
-                    appState = { ...appState, ...JSON.parse(savedState) };
-                }
-            } catch (e) {
-                console.error("Could not load data. Starting fresh.", e);
+                // Login mode
+                document.getElementById('auth-title').textContent = 'הזן קוד גישה';
+                document.getElementById('auth-subtitle').textContent = 'המערכת נעולה לאבטחת פרטיותך';
+                document.getElementById('auth-btn-text').textContent = 'שחרר נעילה';
             }
         }
 
-        function saveState() {
-            localStorage.setItem(LS_PREFIX + 'data', JSON.stringify(appState));
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
         }
 
-        // --- Themes ---
-        function cycleTheme() {
-            appState.themeIndex = (appState.themeIndex + 1) % themes.length;
-            applyTheme();
-            saveState();
-        }
+        // --- AUTH LOGIC ---
+        async function handleAuth(e) {
+            e.preventDefault();
+            const pinInput = document.getElementById('auth-pin');
+            const errorMsg = document.getElementById('auth-error');
+            const pin = pinInput.value.trim();
 
-        function applyTheme() {
-            // Remove all theme classes from body
-            themes.forEach(t => document.body.classList.remove(t));
-            
-            // Add current theme class (if not default/classic which is :root)
-            const currentTheme = themes[appState.themeIndex];
-            if (currentTheme !== 'theme-classic') {
-                document.body.classList.add(currentTheme);
-            }
-            
-            // Change theme icon based on theme
-            const icon = document.getElementById('theme-icon');
-            if (currentTheme === 'theme-classic') {
-                icon.className = 'fas fa-building text-blue-600';
-            } else if (currentTheme === 'theme-cyberpunk') {
-                icon.className = 'fas fa-gamepad text-purple-400';
-            } else {
-                icon.className = 'fas fa-leaf text-green-600';
-            }
-        }
-
-        // --- UI Navigation ---
-        function showScreen(screenId) {
-            document.getElementById('screen-set-password').classList.add('hidden');
-            document.getElementById('screen-login').classList.add('hidden');
-            document.getElementById('screen-main').classList.add('hidden');
-            
-            document.getElementById(screenId).classList.remove('hidden');
-            
-            if (screenId === 'screen-main') {
-                startMainApp();
-            }
-        }
-
-        // --- Authentication ---
-        function setPassword() {
-            const pwd1 = document.getElementById('input-new-password').value;
-            const pwd2 = document.getElementById('input-confirm-password').value;
-            const errorEl = document.getElementById('set-password-error');
-            
-            if (pwd1.length < 4) {
-                errorEl.textContent = 'הסיסמה חייבת להכיל לפחות 4 תווים.';
-                errorEl.classList.remove('hidden');
+            if (pin.length < 4) {
+                showAuthError("קוד חייב להכיל לפחות 4 ספרות.");
                 return;
             }
-            if (pwd1 !== pwd2) {
-                errorEl.textContent = 'הסיסמאות אינן תואמות.';
-                errorEl.classList.remove('hidden');
-                return;
-            }
-            
-            appState.password = pwd1;
-            appState.startTime = Date.now();
-            saveState();
-            showScreen('screen-main');
-        }
 
-        function login() {
-            const pwd = document.getElementById('input-login-password').value;
-            const errorEl = document.getElementById('login-error');
-            
-            if (pwd === appState.password) {
-                errorEl.classList.add('hidden');
-                document.getElementById('input-login-password').value = '';
-                showScreen('screen-main');
+            const hashed = await hashPIN(pin);
+
+            if (!appData.pinHash) {
+                // Set new PIN
+                appData.pinHash = hashed;
+                saveData();
+                sessionStorage.setItem('auth_session', 'true');
+                transitionToDashboard();
             } else {
-                errorEl.classList.remove('hidden');
-            }
-        }
-
-        document.getElementById('input-login-password').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') login();
-        });
-
-        // --- Main App Logic ---
-        function startMainApp() {
-            document.getElementById('app-title').textContent = appState.title;
-            
-            if (!appState.startTime) {
-                appState.startTime = Date.now();
-                saveState();
-            }
-            
-            updateTimerDisplay();
-            if (timerInterval) clearInterval(timerInterval);
-            timerInterval = setInterval(updateTimerDisplay, 1000);
-            
-            renderHistory();
-        }
-
-        function setRingProgress(ringId, percent) {
-            const circle = document.getElementById(ringId);
-            if (circle) {
-                const offset = CIRCUMFERENCE - (percent / 100) * CIRCUMFERENCE;
-                circle.style.strokeDashoffset = offset;
-            }
-        }
-
-        function updateTimerDisplay() {
-            const now = Date.now();
-            const diff = Math.max(0, now - appState.startTime);
-            
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-            const minutes = Math.floor((diff / 1000 / 60) % 60);
-            const seconds = Math.floor((diff / 1000) % 60);
-            
-            // Update Texts
-            document.getElementById('timer-days').textContent = days.toString().padStart(2, '0');
-            document.getElementById('timer-hours').textContent = hours.toString().padStart(2, '0');
-            document.getElementById('timer-minutes').textContent = minutes.toString().padStart(2, '0');
-            document.getElementById('timer-seconds').textContent = seconds.toString().padStart(2, '0');
-            
-            // Update Rings Progress
-            // Seconds: 0-60
-            setRingProgress('ring-seconds', (seconds / 60) * 100);
-            // Minutes: 0-60
-            setRingProgress('ring-minutes', (minutes / 60) * 100);
-            // Hours: 0-24
-            setRingProgress('ring-hours', (hours / 24) * 100);
-            // Days: Loop visual every 30 days to keep the ring moving
-            const daysPercent = Math.min(100, (days % 30 / 30) * 100);
-            setRingProgress('ring-days', days === 0 ? 0 : (daysPercent === 0 ? 100 : daysPercent));
-            
-            updateBadges(diff);
-            updateWeeklyReview();
-        }
-
-        function updateBadges(durationMs) {
-            const milestones = [
-                { id: 'badge-24h', ms: 86400000 },
-                { id: 'badge-3d', ms: 259200000 },
-                { id: 'badge-1w', ms: 604800000 },
-                { id: 'badge-1m', ms: 2592000000 }
-            ];
-            
-            milestones.forEach(m => {
-                const el = document.getElementById(m.id);
-                if (durationMs >= m.ms) {
-                    el.classList.remove('badge-locked');
-                    if (!el.dataset.unlocked) {
-                        el.dataset.unlocked = "true";
-                        el.classList.add('animate-bounce');
-                        setTimeout(() => el.classList.remove('animate-bounce'), 2000);
-                    }
+                // Verify PIN
+                if (appData.pinHash === hashed) {
+                    sessionStorage.setItem('auth_session', 'true');
+                    transitionToDashboard();
                 } else {
-                    el.classList.add('badge-locked');
-                    el.dataset.unlocked = "";
+                    showAuthError("קוד שגוי, נסה שוב.");
+                    pinInput.value = '';
                 }
+            }
+        }
+
+        function showAuthError(msg) {
+            const err = document.getElementById('auth-error');
+            err.textContent = msg;
+            err.classList.remove('opacity-0');
+            setTimeout(() => err.classList.add('opacity-0'), 3000);
+        }
+
+        function logout() {
+            closeModals();
+            sessionStorage.removeItem('auth_session');
+            document.getElementById('auth-pin').value = '';
+            
+            // UI Transition
+            const authScreen = document.getElementById('screen-auth');
+            const dashScreen = document.getElementById('screen-dashboard');
+            const detailScreen = document.getElementById('screen-detail');
+            
+            detailScreen.className = 'screen-transition slide-out-left flex flex-col h-full bg-[#09090b]/95 backdrop-blur-xl';
+            dashScreen.className = 'screen-transition fade-hidden flex flex-col h-full';
+            authScreen.className = 'screen-transition fade-visible flex flex-col items-center justify-center p-6 text-center z-50 bg-[#09090b]';
+            
+            if(timerInterval) clearInterval(timerInterval);
+        }
+
+        // --- ROUTING / TRANSITIONS ---
+        function transitionToDashboard() {
+            document.getElementById('screen-auth').className = 'screen-transition fade-hidden flex flex-col items-center justify-center p-6 text-center z-50 bg-[#09090b]';
+            document.getElementById('screen-dashboard').className = 'screen-transition fade-visible flex flex-col h-full';
+            renderDashboard();
+            startTimerLoop();
+        }
+
+        function openDetail(id) {
+            currentHabitId = id;
+            document.getElementById('screen-dashboard').className = 'screen-transition slide-out-right flex flex-col h-full';
+            document.getElementById('screen-detail').className = 'screen-transition slide-in-right flex flex-col h-full bg-[#09090b]/95 backdrop-blur-xl';
+            renderDetail();
+        }
+
+        function closeDetail() {
+            currentHabitId = null;
+            document.getElementById('screen-detail').className = 'screen-transition slide-out-left flex flex-col h-full bg-[#09090b]/95 backdrop-blur-xl';
+            document.getElementById('screen-dashboard').className = 'screen-transition slide-in-right flex flex-col h-full';
+            renderDashboard();
+        }
+
+        // --- CORE LOGIC & RENDERING ---
+        
+        function generateRingSVG(idPrefix, radius, designKey) {
+            const d = DESIGNS.find(x => x.id === designKey) || DESIGNS[0];
+            const circum = 2 * Math.PI * radius;
+            const boxSize = radius * 2 + d.width * 2 + 10;
+            const center = boxSize / 2;
+            
+            return `
+                <svg class="w-full h-full absolute inset-0 transform -rotate-90 pointer-events-none" viewBox="0 0 ${boxSize} ${boxSize}">
+                    <circle cx="${center}" cy="${center}" r="${radius}" fill="none" stroke="${d.track}" stroke-width="${d.width}" stroke-dasharray="${d.trackDash}"></circle>
+                    <circle id="${idPrefix}-ring" cx="${center}" cy="${center}" r="${radius}" fill="none" stroke="${d.color}" stroke-width="${d.width}" stroke-linecap="round" 
+                            style="filter: drop-shadow(${d.shadow}); transition: stroke-dashoffset 1s linear;" 
+                            stroke-dasharray="${circum}" stroke-dashoffset="${circum}"></circle>
+                </svg>
+            `;
+        }
+
+        function startTimerLoop() {
+            if (timerInterval) clearInterval(timerInterval);
+            updateAllTimers(); // Initial call
+            timerInterval = setInterval(updateAllTimers, 1000);
+        }
+
+        function updateAllTimers() {
+            const now = Date.now();
+            
+            // Update Dashboard UI if visible
+            if (!currentHabitId) {
+                appData.habits.forEach(habit => {
+                    const duration = Math.max(0, now - habit.startTime);
+                    const ms = getMilestoneInfo(duration);
+                    const isFav = habit.id === appData.favoriteId;
+                    
+                    if (isFav) {
+                        const elFavTime = document.getElementById('fav-time');
+                        const favRing = document.getElementById('fav-ring');
+                        const favDays = document.getElementById('fav-days');
+                        const favMilestoneText = document.getElementById('fav-milestone-text');
+                        
+                        if (elFavTime && favRing && favDays && favMilestoneText) {
+                            const { d, h, m, s } = parseTime(duration);
+                            elFavTime.textContent = `${h}:${m}:${s}`;
+                            favDays.textContent = `${d} ימים`;
+                            favMilestoneText.textContent = `יעד הבא: ${ms.nextLabel}`;
+                            
+                            const circum = 2 * Math.PI * 70;
+                            favRing.style.strokeDashoffset = circum - (ms.progressPercent * circum);
+                        }
+                    }
+                    
+                    if (habit.id !== appData.favoriteId) {
+                        const el = document.getElementById(`dash-time-${habit.id}`);
+                        const ring = document.getElementById(`dash-ring-${habit.id}`);
+                        if (el && ring) {
+                            el.textContent = formatDurationShort(duration);
+                            const circum = 2 * Math.PI * 16;
+                            ring.style.strokeDashoffset = circum - (ms.progressPercent * circum);
+                        }
+                    }
+                });
+            } 
+            // Update Detail UI if visible
+            else {
+                const habit = appData.habits.find(h => h.id === currentHabitId);
+                if (habit) {
+                    const duration = Math.max(0, now - habit.startTime);
+                    const ms = getMilestoneInfo(duration);
+                    
+                    // Format times
+                    const { d, h, m, s } = parseTime(duration);
+                    const detailDays = document.getElementById('detail-days');
+                    const detailTime = document.getElementById('detail-time');
+                    const detailMilestoneText = document.getElementById('detail-milestone-text');
+
+                    if (detailDays) detailDays.textContent = `${d} ימים`;
+                    if (detailTime) detailTime.textContent = `${h}:${m}:${s}`;
+                    
+                    // Milestone info
+                    const remainingStr = formatDurationShort(ms.nextMs - duration);
+                    if (detailMilestoneText) detailMilestoneText.textContent = `יעד הבא: ${ms.nextLabel} (עוד ${remainingStr})`;
+                    
+                    // Update SVG Ring
+                    const ring = document.getElementById('detail-ring');
+                    if (ring) {
+                        const circum = 2 * Math.PI * 90;
+                        ring.style.strokeDashoffset = circum - (ms.progressPercent * circum);
+                    }
+
+                    // Check if hit new milestone for confetti
+                    const currentMilestoneIndex = ms.currentIndex;
+                    if (currentMilestoneIndex >= 0 && (habit.lastMilestoneAlert === undefined || habit.lastMilestoneAlert < currentMilestoneIndex)) {
+                        habit.lastMilestoneAlert = currentMilestoneIndex;
+                        saveData();
+                        shootConfetti();
+                        renderDetail(); // Re-render to show new badge instantly
+                    }
+                }
+            }
+        }
+
+        function renderDashboard() {
+            const container = document.getElementById('habits-list');
+            container.innerHTML = '';
+
+            if (appData.habits.length === 0) {
+                container.innerHTML = `
+                    <div class="h-full flex flex-col items-center justify-center opacity-50 mt-20">
+                        <i class="fas fa-seedling text-5xl mb-4"></i>
+                        <p>אין הישגים עדיין. הוסף אחד חדש!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const now = Date.now();
+            
+            // Render Favorite Widget
+            const favHabit = appData.habits.find(h => h.id === appData.favoriteId);
+            if (favHabit) {
+                const duration = Math.max(0, Date.now() - favHabit.startTime);
+                const ms = getMilestoneInfo(duration);
+                const svgHtml = generateRingSVG('fav', 70, favHabit.design);
+                
+                container.innerHTML += `
+                    <div class="glass-panel p-5 rounded-3xl mb-6 relative overflow-hidden btn-press" onclick="openDetail(${favHabit.id})">
+                        <div class="absolute top-4 right-4 text-yellow-400 text-lg"><i class="fas fa-star"></i></div>
+                        <div class="flex flex-col items-center justify-center">
+                            <h2 class="text-xl font-bold mb-4 w-full text-center truncate px-8">${escapeHTML(favHabit.title)}</h2>
+                            <div class="relative w-44 h-44 flex items-center justify-center mb-2">
+                                ${svgHtml}
+                                <div class="text-center flex flex-col items-center justify-center z-10 w-full px-2">
+                                    <span id="fav-days" class="text-xs font-semibold text-brand-400 uppercase tracking-widest mb-1">...</span>
+                                    <span id="fav-time" class="text-2xl font-mono font-bold tracking-tight text-white mb-1" dir="ltr">...</span>
+                                </div>
+                            </div>
+                            <div class="glass-panel px-3 py-1 rounded-full flex items-center gap-2 mt-2">
+                                <i class="fas fa-flag-checkered text-[10px] text-gray-400"></i>
+                                <span id="fav-milestone-text" class="text-xs text-gray-300">יעד הבא: --</span>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 class="text-sm font-bold text-gray-400 mb-3 px-2">כל ההישגים</h3>
+                `;
+            }
+
+            const otherHabits = appData.habits.filter(h => h.id !== appData.favoriteId).sort((a,b) => b.startTime - a.startTime);
+            
+            otherHabits.forEach(habit => {
+                const duration = Math.max(0, now - habit.startTime);
+                const ms = getMilestoneInfo(duration);
+                const timeStr = formatDurationShort(duration);
+                const svgHtml = generateRingSVG(`dash-${habit.id}`, 16, habit.design);
+
+                const card = document.createElement('div');
+                card.className = "glass-panel p-4 rounded-2xl flex items-center justify-between cursor-pointer btn-press border-l-4 border-brand-500 mb-4";
+                card.onclick = () => openDetail(habit.id);
+                card.innerHTML = `
+                    <div class="flex-1 pr-2">
+                        <h3 class="font-bold text-lg text-white mb-1 truncate">${escapeHTML(habit.title)}</h3>
+                        <div class="text-sm font-mono text-gray-300 bg-white/5 inline-block px-2 py-0.5 rounded" dir="ltr" id="dash-time-${habit.id}">
+                            ${timeStr}
+                        </div>
+                    </div>
+                    <div class="relative w-12 h-12 flex-shrink-0">
+                        ${svgHtml}
+                        <div class="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-brand-400 text-center leading-none">
+                            ${ms.nextLabel.replace(' ', '<br>')}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
             });
         }
 
-        // --- Modals & Actions ---
-        function openTitleModal() {
-            document.getElementById('input-app-title').value = appState.title;
-            const modal = document.getElementById('modal-title');
-            const content = document.getElementById('modal-title-content');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                content.classList.remove('scale-95');
-                content.classList.add('scale-100');
-            }, 10);
-        }
-
-        function closeTitleModal() {
-            const modal = document.getElementById('modal-title');
-            const content = document.getElementById('modal-title-content');
-            content.classList.remove('scale-100');
-            content.classList.add('scale-95');
-            setTimeout(() => modal.classList.add('hidden'), 300);
-        }
-
-        function saveTitle() {
-            const newTitle = document.getElementById('input-app-title').value.trim();
-            if (newTitle) {
-                appState.title = newTitle;
-                document.getElementById('app-title').textContent = appState.title;
-                saveState();
+        function toggleFavorite() {
+            if (appData.favoriteId === currentHabitId) {
+                appData.favoriteId = null;
+            } else {
+                appData.favoriteId = currentHabitId;
             }
-            closeTitleModal();
+            saveData();
+            renderDetail();
         }
 
-        function openResetModal() {
-            const modal = document.getElementById('modal-reset');
-            const content = document.getElementById('modal-reset-content');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                content.classList.remove('scale-95');
-                content.classList.add('scale-100');
-            }, 10);
+        function cycleDesign() {
+            const habit = appData.habits.find(h => h.id === currentHabitId);
+            if (!habit) return;
+            
+            const currentIndex = DESIGNS.findIndex(d => d.id === habit.design);
+            const nextIndex = (currentIndex + 1) % DESIGNS.length;
+            habit.design = DESIGNS[nextIndex].id;
+            
+            saveData();
+            renderDetail();
         }
 
-        function closeResetModal() {
-            const modal = document.getElementById('modal-reset');
-            const content = document.getElementById('modal-reset-content');
-            content.classList.remove('scale-100');
-            content.classList.add('scale-95');
-            setTimeout(() => modal.classList.add('hidden'), 300);
+        function renderDetail() {
+            const habit = appData.habits.find(h => h.id === currentHabitId);
+            if (!habit) return closeDetail();
+
+            document.getElementById('detail-title').textContent = habit.title;
+            
+            // Handle favorite UI
+            const favBtn = document.getElementById('btn-toggle-fav');
+            if (appData.favoriteId === habit.id) {
+                favBtn.classList.replace('text-gray-400', 'text-yellow-400');
+            } else {
+                favBtn.classList.replace('text-yellow-400', 'text-gray-400');
+            }
+            
+            // Inject dynamic SVG ring
+            const ringContainer = document.getElementById('detail-ring-container');
+            const existingOverlay = document.getElementById('detail-text-overlay');
+            ringContainer.innerHTML = generateRingSVG('detail', 90, habit.design);
+            if (existingOverlay) {
+                ringContainer.appendChild(existingOverlay);
+            }
+            
+            // Render Unlocked Milestones (Badges)
+            const msContainer = document.getElementById('detail-milestones');
+            msContainer.innerHTML = '';
+            const duration = Math.max(0, Date.now() - habit.startTime);
+            const msInfo = getMilestoneInfo(duration);
+            
+            if (msInfo.currentIndex < 0) {
+                msContainer.innerHTML = '<p class="text-xs text-gray-500 w-full text-center py-2">המשך כך כדי להשיג את התג הראשון שלך!</p>';
+            } else {
+                for (let i = 0; i <= msInfo.currentIndex; i++) {
+                    const m = MILESTONES[i];
+                    msContainer.innerHTML += `
+                        <div class="flex flex-col items-center justify-center bg-brand-500/10 border border-brand-500/30 rounded-xl p-2 w-[70px] h-[70px] text-brand-400 shadow-[0_0_10px_rgba(139,92,246,0.15)] relative overflow-hidden group">
+                            <div class="absolute inset-0 bg-brand-500/20 translate-y-[100%] group-hover:translate-y-0 transition-transform"></div>
+                            <i class="fas ${m.icon} text-2xl mb-1 relative z-10"></i>
+                            <span class="text-[10px] font-bold text-center leading-tight relative z-10 text-white">${m.label}</span>
+                        </div>
+                    `;
+                }
+            }
+
+            // Render History
+            const histContainer = document.getElementById('detail-history');
+            histContainer.innerHTML = '';
+            
+            if (!habit.history || habit.history.length === 0) {
+                histContainer.innerHTML = '<p class="text-xs text-gray-500 text-center py-2">אין היסטוריה עדיין.</p>';
+            } else {
+                const maxDuration = Math.max(...habit.history.map(h => h.duration));
+                habit.history.sort((a,b) => b.end - a.end).forEach(h => {
+                    const isRecord = h.duration === maxDuration && h.duration > 0;
+                    const dateStr = new Date(h.end).toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: '2-digit' });
+                    
+                    const div = document.createElement('div');
+                    div.className = `flex justify-between items-center p-3 rounded-xl bg-black/20 border ${isRecord ? 'border-yellow-500/50' : 'border-glass-border'}`;
+                    div.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            ${isRecord ? '<i class="fas fa-crown text-yellow-500"></i>' : '<div class="w-2 h-2 rounded-full bg-brand-500"></div>'}
+                            <span class="font-mono text-sm" dir="ltr">${formatDurationShort(h.duration)}</span>
+                        </div>
+                        <div class="text-xs text-gray-400" dir="ltr">${dateStr}</div>
+                    `;
+                    histContainer.appendChild(div);
+                });
+            }
+            
+            updateAllTimers(); // force immediate update of rings/text
+        }
+
+        // --- ACTION FUNCTIONS ---
+        function saveNewHabit() {
+            const input = document.getElementById('input-habit-title');
+            const title = input.value.trim();
+            if (!title) return;
+
+            const newHabit = {
+                id: Date.now(),
+                title: title,
+                design: 'neon',
+                startTime: Date.now(),
+                history: [],
+                lastMilestoneAlert: 0
+            };
+
+            appData.habits.push(newHabit);
+            saveData();
+            input.value = '';
+            closeModals();
+            renderDashboard();
+            
+            // Jump directly to the new habit detail
+            openDetail(newHabit.id);
         }
 
         function confirmReset() {
-            const now = Date.now();
-            const duration = now - appState.startTime;
-            
-            // Add any reset to history immediately
-            const maxRecord = appState.history.length > 0 ? Math.max(...appState.history.map(h => h.duration)) : 0;
-            
-            appState.history.push({
-                id: now,
-                start: appState.startTime,
-                end: now,
-                duration: duration
+            const habit = appData.habits.find(h => h.id === currentHabitId);
+            if (habit) {
+                const now = Date.now();
+                const duration = now - habit.startTime;
+                
+                if (duration > 60000) { // Only save if more than 1 minute
+                    habit.history.unshift({
+                        start: habit.startTime,
+                        end: now,
+                        duration: duration
+                    });
+                    
+                    // Keep history manageable
+                    if (habit.history.length > 50) habit.history.length = 50;
+                    
+                    // Check if new record
+                    const maxRecord = Math.max(...habit.history.map(h => h.duration));
+                    if (duration >= maxRecord && habit.history.length > 1) {
+                        shootConfetti();
+                    }
+                }
+
+                habit.startTime = now;
+                habit.lastMilestoneAlert = 0;
+                saveData();
+                renderDetail();
+            }
+            closeModals();
+        }
+
+        function deleteCurrentHabit() {
+            if(confirm('האם אתה בטוח שברצונך למחוק הישג זה? כל ההיסטוריה תימחק.')) {
+                appData.habits = appData.habits.filter(h => h.id !== currentHabitId);
+                saveData();
+                closeDetail();
+            }
+        }
+
+        // --- MODAL CONTROLS ---
+        function openAddModal() { showModal('modal-add'); document.getElementById('input-habit-title').focus(); }
+        function openResetModal() { showModal('modal-reset'); }
+        function openSettingsModal() { showModal('modal-settings'); }
+        
+        function showModal(id) {
+            const modal = document.getElementById(id);
+            const content = document.getElementById(id + '-content');
+            modal.classList.remove('hidden');
+            // Trigger reflow for animation
+            void modal.offsetWidth; 
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }
+
+        function closeModals() {
+            ['modal-add', 'modal-reset', 'modal-settings'].forEach(id => {
+                const modal = document.getElementById(id);
+                const content = document.getElementById(id + '-content');
+                if (!modal.classList.contains('hidden')) {
+                    content.classList.remove('scale-100', 'opacity-100');
+                    content.classList.add('scale-95', 'opacity-0');
+                    setTimeout(() => modal.classList.add('hidden'), 200); // Wait for transition
+                }
             });
+        }
+
+        // --- UTILS & MATH ---
+        function parseTime(ms) {
+            const d = Math.floor(ms / (1000 * 60 * 60 * 24));
+            const h = Math.floor((ms / (1000 * 60 * 60)) % 24).toString().padStart(2, '0');
+            const m = Math.floor((ms / (1000 * 60)) % 60).toString().padStart(2, '0');
+            const s = Math.floor((ms / 1000) % 60).toString().padStart(2, '0');
+            return { d, h, m, s };
+        }
+
+        function formatDurationShort(ms) {
+            const { d, h, m, s } = parseTime(ms);
+            if (d > 0) return `${d}d ${h}:${m}:${s}`;
+            return `${h}:${m}:${s}`;
+        }
+
+        function getMilestoneInfo(durationMs) {
+            let nextM = MILESTONES[0];
+            let currentIndex = -1;
             
-            // Sort by end date descending
-            appState.history.sort((a, b) => b.end - a.end);
-            if (appState.history.length > 200) appState.history.length = 200;
-            
-            if (duration > maxRecord && maxRecord > 0 && duration > 60000) {
-                shootConfetti();
+            for (let i = 0; i < MILESTONES.length; i++) {
+                if (durationMs < MILESTONES[i].ms) {
+                    nextM = MILESTONES[i];
+                    currentIndex = i - 1;
+                    break;
+                }
             }
 
-            appState.startTime = Date.now();
-            saveState();
+            if (currentIndex === -1 && durationMs >= MILESTONES[MILESTONES.length-1].ms) {
+                currentIndex = MILESTONES.length - 1;
+                nextM = MILESTONES[MILESTONES.length - 1];
+            }
+
+            // Progress relative to absolute 0 to next target milestone
+            const progress = Math.min(1, Math.max(0, durationMs / nextM.ms));
             
-            updateTimerDisplay();
-            renderHistory();
-            closeResetModal();
+            return {
+                currentIndex: currentIndex,
+                nextLabel: nextM.label,
+                nextMs: nextM.ms,
+                progressPercent: progress
+            };
         }
 
         function shootConfetti() {
             const duration = 3000;
-            const animationEnd = Date.now() + duration;
-            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
+            const end = Date.now() + duration;
+            const colors = ['#8b5cf6', '#a78bfa', '#ffffff'];
 
-            function randomInRange(min, max) {
-                return Math.random() * (max - min) + min;
-            }
+            (function frame() {
+                confetti({
+                    particleCount: 4,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: colors,
+                    zIndex: 1000
+                });
+                confetti({
+                    particleCount: 4,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: colors,
+                    zIndex: 1000
+                });
 
-            const interval = setInterval(function() {
-                const timeLeft = animationEnd - Date.now();
-
-                if (timeLeft <= 0) {
-                    return clearInterval(interval);
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
                 }
-
-                const particleCount = 50 * (timeLeft / duration);
-                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
-                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
-            }, 250);
+            }());
         }
 
-        // --- Weekly Review Logic ---
-        function getHebrewDay(date) {
-            const days = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
-            return days[date.getDay()];
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    "'": '&#39;',
+                    '"': '&quot;'
+                }[tag] || tag)
+            );
         }
 
-        function updateWeeklyReview() {
-            const now = Date.now();
-            const sevenDaysAgo = now - (7 * 24 * 60 * 60 * 1000);
-            
-            let recentAttempts = appState.history.filter(h => h.end >= sevenDaysAgo);
-            
-            recentAttempts.push({
-                start: appState.startTime,
-                end: now,
-                duration: now - appState.startTime
-            });
+        // --- BACKUP & RESTORE ---
+        function exportData() {
+            const dataStr = JSON.stringify(appData);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            const exportFileDefaultName = `habits_backup_${new Date().toISOString().slice(0,10)}.json`;
 
-            let bestAttempt = recentAttempts[0];
-            for (let i = 1; i < recentAttempts.length; i++) {
-                if (recentAttempts[i].duration > bestAttempt.duration) {
-                    bestAttempt = recentAttempts[i];
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            closeModals();
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (parsed.pinHash && Array.isArray(parsed.habits)) {
+                        appData = parsed;
+                        saveData();
+                        alert("הנתונים שוחזרו בהצלחה!");
+                        location.reload();
+                    } else {
+                        alert("קובץ לא תקין.");
+                    }
+                } catch (err) {
+                    alert("שגיאה בקריאת הקובץ.");
                 }
-            }
-
-            const bestDate = new Date(bestAttempt.end); 
-            const dayName = getHebrewDay(bestDate);
-            
-            document.getElementById('weekly-best-day').textContent = `יום ${dayName}`;
-            document.getElementById('weekly-best-duration').innerHTML = `<i class="fas fa-medal ml-1"></i> ${formatDuration(bestAttempt.duration)}`;
+            };
+            reader.readAsText(file);
         }
 
-        // --- History Formatting & Rendering ---
-        function formatDuration(ms) {
-            const days = Math.floor(ms / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
-            const minutes = Math.floor((ms / 1000 / 60) % 60);
-            const seconds = Math.floor((ms / 1000) % 60);
-            
-            let parts = [];
-            if (days > 0) parts.push(`${days} ימים`);
-            if (hours > 0) parts.push(`${hours} שעות`);
-            if (minutes > 0) parts.push(`${minutes} דק'`);
-            
-            if (parts.length === 0) parts.push(`${seconds} שניות`); 
-            
-            return parts.join(' ו-');
-        }
-
-        function formatDate(timestamp) {
-            const date = new Date(timestamp);
-            return date.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: '2-digit' }) + 
-                   ' ' + date.toLocaleTimeString('he-IL', { hour: '2-digit', minute:'2-digit' });
-        }
-
-        function renderHistory() {
-            const container = document.getElementById('history-container');
-            container.innerHTML = '';
-            
-            if (!appState.history || appState.history.length === 0) {
-                container.innerHTML = '<div class="text-center text-textMuted text-sm mt-4">עדיין אין היסטוריה. זה הזמן להתחיל לשבור שיאים!</div>';
-                return;
-            }
-
-            const maxDuration = Math.max(...appState.history.map(h => h.duration));
-
-            appState.history.forEach((entry, index) => {
-                const isRecord = entry.duration === maxDuration && maxDuration > 0;
-                
-                const el = document.createElement('div');
-                el.className = `flex justify-between items-center p-3 rounded-xl border transition-colors ${
-                    isRecord 
-                    ? 'border-yellow-400/50 bg-yellow-100/20 text-yellow-600' 
-                    : 'border-gray-400/20 bg-background/50 text-textMain'
-                }`;
-                
-                el.innerHTML = `
-                    <div class="flex flex-col">
-                        <span class="font-bold">${formatDuration(entry.duration)}</span>
-                        <span class="text-xs opacity-70">${formatDate(entry.end)}</span>
-                    </div>
-                    ${isRecord ? '<i class="fas fa-trophy text-yellow-500 text-xl drop-shadow-md"></i>' : ''}
-                `;
-                container.appendChild(el);
-            });
-        }
+        // --- BOOTSTRAP ---
+        window.onload = init;
     </script>
 </body>
 </html>
